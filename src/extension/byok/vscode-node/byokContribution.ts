@@ -11,19 +11,10 @@ import { ILogService } from '../../../platform/log/common/logService';
 import { IFetcherService } from '../../../platform/networking/common/fetcherService';
 import { Disposable } from '../../../util/vs/base/common/lifecycle';
 import { IInstantiationService } from '../../../util/vs/platform/instantiation/common/instantiation';
-import { BYOKKnownModels, BYOKModelProvider, isBYOKEnabled } from '../../byok/common/byokProvider';
+import { BYOKModelProvider } from '../../byok/common/byokProvider';
 import { IExtensionContribution } from '../../common/contributions';
-import { AnthropicLMProvider } from './anthropicProvider';
-import { AzureBYOKModelProvider } from './azureProvider';
 import { BYOKStorageService, IBYOKStorageService } from './byokStorageService';
-import { CustomOAIModelConfigurator } from './customOAIModelConfigurator';
-import { CustomOAIBYOKModelProvider } from './customOAIProvider';
-import { GeminiNativeBYOKLMProvider } from './geminiNativeProvider';
-import { GroqBYOKLMProvider } from './groqProvider';
 import { OllamaLMProvider } from './ollamaProvider';
-import { OAIBYOKLMProvider } from './openAIProvider';
-import { OpenRouterLMProvider } from './openRouterProvider';
-import { XAIBYOKLMProvider } from './xAIProvider';
 
 export class BYOKContrib extends Disposable implements IExtensionContribution {
 	public readonly id: string = 'byok-contribution';
@@ -41,37 +32,16 @@ export class BYOKContrib extends Disposable implements IExtensionContribution {
 		@IInstantiationService private readonly _instantiationService: IInstantiationService,
 	) {
 		super();
-		this._register(commands.registerCommand('github.copilot.chat.manageBYOK', async (vendor: string) => {
-			const provider = this._providers.get(vendor);
-
-			// Show quick pick for Azure and CustomOAI providers
-			if (provider && (vendor === AzureBYOKModelProvider.providerName.toLowerCase() || vendor === CustomOAIBYOKModelProvider.providerName.toLowerCase())) {
-				const configurator = new CustomOAIModelConfigurator(this._configurationService, vendor, provider);
-				await configurator.configureModelOrUpdateAPIKey();
-			} else if (provider) {
-				// For all other providers, directly go to API key management
-				await provider.updateAPIKey();
+		// OLLAMA CODE: Simplified command for Ollama configuration
+		this._register(commands.registerCommand('ollama.code.configure', async () => {
+			// For Ollama, we just need to configure the endpoint URL
+			const provider = this._providers.get(OllamaLMProvider.providerName.toLowerCase());
+			if (provider) {
+				await commands.executeCommand('workbench.action.openSettings', '@ext:ollama-code ollama.apiUrl');
 			}
 		}));
 
-		this._register(commands.registerCommand('github.copilot.chat.manageBYOKAPIKey', async (vendor: string, envVarName: string, action?: 'update' | 'remove', modelId?: string) => {
-			const provider = this._providers.get(vendor);
-			if (!provider) {
-				this._logService.error(`BYOK: Provider ${vendor} not found`);
-				return;
-			}
-
-			try {
-				if (provider.updateAPIKeyViaCmd) {
-					await provider.updateAPIKeyViaCmd(envVarName, action ?? 'update', modelId);
-				} else {
-					this._logService.error(`BYOK: Provider ${vendor} does not support API key management via command`);
-				}
-			} catch (error) {
-				this._logService.error(`BYOK: Failed to ${action || 'update'} API key for provider ${vendor}${modelId ? ` and model ${modelId}` : ''}`, error);
-				throw error;
-			}
-		}));
+		// OLLAMA CODE: Removed API key management - Ollama doesn't require authentication
 
 		this._byokStorageService = new BYOKStorageService(extensionContext);
 		this._authChange(authService, this._instantiationService);
@@ -82,23 +52,20 @@ export class BYOKContrib extends Disposable implements IExtensionContribution {
 	}
 
 	private async _authChange(authService: IAuthenticationService, instantiationService: IInstantiationService) {
-		if (authService.copilotToken && isBYOKEnabled(authService.copilotToken, this._capiClientService) && !this._byokProvidersRegistered) {
+		// OLLAMA CODE: Removed BYOK gating - Ollama is always available
+		if (!this._byokProvidersRegistered) {
 			this._byokProvidersRegistered = true;
-			// Update known models list from CDN so all providers have the same list
-			const knownModels = await this.fetchKnownModelList(this._fetcherService);
-			this._providers.set(OllamaLMProvider.providerName.toLowerCase(), instantiationService.createInstance(OllamaLMProvider, this._configurationService.getConfig(ConfigKey.OllamaEndpoint), this._byokStorageService));
-			this._providers.set(AnthropicLMProvider.providerName.toLowerCase(), instantiationService.createInstance(AnthropicLMProvider, knownModels[AnthropicLMProvider.providerName], this._byokStorageService));
-			this._providers.set(GroqBYOKLMProvider.providerName.toLowerCase(), instantiationService.createInstance(GroqBYOKLMProvider, knownModels[GroqBYOKLMProvider.providerName], this._byokStorageService));
-			this._providers.set(GeminiNativeBYOKLMProvider.providerName.toLowerCase(), instantiationService.createInstance(GeminiNativeBYOKLMProvider, knownModels[GeminiNativeBYOKLMProvider.providerName], this._byokStorageService));
-			this._providers.set(XAIBYOKLMProvider.providerName.toLowerCase(), instantiationService.createInstance(XAIBYOKLMProvider, knownModels[XAIBYOKLMProvider.providerName], this._byokStorageService));
-			this._providers.set(OAIBYOKLMProvider.providerName.toLowerCase(), instantiationService.createInstance(OAIBYOKLMProvider, knownModels[OAIBYOKLMProvider.providerName], this._byokStorageService));
-			this._providers.set(OpenRouterLMProvider.providerName.toLowerCase(), instantiationService.createInstance(OpenRouterLMProvider, this._byokStorageService));
-			this._providers.set(AzureBYOKModelProvider.providerName.toLowerCase(), instantiationService.createInstance(AzureBYOKModelProvider, this._byokStorageService));
-			this._providers.set(CustomOAIBYOKModelProvider.providerName.toLowerCase(), instantiationService.createInstance(CustomOAIBYOKModelProvider, this._byokStorageService));
+			// Only register Ollama provider for Ollama Code
+			// Configure endpoint from settings (default to localhost:11434)
+			const ollamaEndpoint = this._configurationService.getConfig(ConfigKey.OllamaEndpoint) || 'http://localhost:11434';
+			this._providers.set(OllamaLMProvider.providerName.toLowerCase(), instantiationService.createInstance(OllamaLMProvider, ollamaEndpoint, this._byokStorageService));
 
+			// Register Ollama as the only provider
 			for (const [providerName, provider] of this._providers) {
 				this._store.add(lm.registerLanguageModelChatProvider(providerName, provider));
 			}
+
+			this._logService.info('Ollama Code: Registered Ollama provider at ' + ollamaEndpoint);
 		}
 	}
 	private async fetchKnownModelList(fetcherService: IFetcherService): Promise<Record<string, BYOKKnownModels>> {

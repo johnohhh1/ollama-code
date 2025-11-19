@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AuthenticationContrib } from '../../authentication/vscode-node/authentication.contribution';
+import { OllamaAuthenticationContrib } from '../../authentication/vscode-node/ollamaAuthentication.contribution';
 import { BYOKContrib } from '../../byok/vscode-node/byokContribution';
 import { ChatQuotaContribution } from '../../chat/vscode-node/chatQuota.contribution';
 import { ChatSessionsContrib } from '../../chatSessions/vscode-node/chatSessions';
@@ -62,7 +62,8 @@ export const vscodeNodeContributions: IExtensionContributionFactory[] = [
 	...vscodeContributions,
 	asContributionFactory(ConversationFeature),
 	workspaceChunkSearchContribution,
-	asContributionFactory(AuthenticationContrib),
+	asContributionFactory(OllamaAuthenticationContrib), // OLLAMA CODE: Using Ollama authentication
+	asContributionFactory(BYOKContrib), // OLLAMA CODE: Moved BYOK to main contributions (always active)
 	chatBlockLanguageContribution,
 	asContributionFactory(LoggingActionsContrib),
 	asContributionFactory(ContextKeysContribution),
@@ -109,7 +110,7 @@ export const vscodeNodeChatContributions: IExtensionContributionFactory[] = [
 	asContributionFactory(FixTestFailureContribution),
 	asContributionFactory(IgnoredFileProviderContribution),
 	asContributionFactory(RelatedFilesProviderContribution),
-	asContributionFactory(BYOKContrib),
+	// OLLAMA CODE: Removed BYOKContrib - moved to main contributions
 	asContributionFactory(McpSetupCommands),
 	asContributionFactory(LanguageModelProxyContrib),
 	newWorkspaceContribution,

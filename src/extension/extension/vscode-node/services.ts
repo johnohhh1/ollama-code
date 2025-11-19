@@ -8,7 +8,8 @@ import { IAuthenticationService } from '../../../platform/authentication/common/
 import { ICopilotTokenManager } from '../../../platform/authentication/common/copilotTokenManager';
 import { StaticGitHubAuthenticationService } from '../../../platform/authentication/common/staticGitHubAuthenticationService';
 import { createStaticGitHubTokenProvider, getOrCreateTestingCopilotTokenManager } from '../../../platform/authentication/node/copilotTokenManager';
-import { AuthenticationService } from '../../../platform/authentication/vscode-node/authenticationService';
+import { OllamaAuthenticationService } from '../../../platform/authentication/vscode-node/ollamaAuthenticationService';
+import { OllamaStubTokenManager } from '../../../platform/authentication/vscode-node/ollamaStubTokenManager';
 import { VSCodeCopilotTokenManager } from '../../../platform/authentication/vscode-node/copilotTokenManager';
 import { IChatAgentService } from '../../../platform/chat/common/chatAgents';
 import { IChatMLFetcher } from '../../../platform/chat/common/chatMLFetcher';
@@ -148,7 +149,8 @@ export function registerServices(builder: IInstantiationServiceBuilder, extensio
 		builder.define(ICopilotTokenManager, getOrCreateTestingCopilotTokenManager(env.devDeviceId));
 	} else {
 		setupTelemetry(builder, extensionContext, internalAIKey, internalLargeEventAIKey, ariaKey);
-		builder.define(ICopilotTokenManager, new SyncDescriptor(VSCodeCopilotTokenManager));
+		// OLLAMA CODE: Use stub token manager for Ollama
+		builder.define(ICopilotTokenManager, new SyncDescriptor(OllamaStubTokenManager));
 	}
 
 	if (isScenarioAutomation) {
@@ -156,7 +158,8 @@ export function registerServices(builder: IInstantiationServiceBuilder, extensio
 		builder.define(IEndpointProvider, new SyncDescriptor(ScenarioAutomationEndpointProviderImpl, [collectFetcherTelemetry]));
 		builder.define(IIgnoreService, new SyncDescriptor(NullIgnoreService));
 	} else {
-		builder.define(IAuthenticationService, new SyncDescriptor(AuthenticationService));
+		// OLLAMA CODE: Use Ollama authentication service
+		builder.define(IAuthenticationService, new SyncDescriptor(OllamaAuthenticationService));
 		builder.define(IEndpointProvider, new SyncDescriptor(ProductionEndpointProvider, [collectFetcherTelemetry]));
 		builder.define(IIgnoreService, new SyncDescriptor(VsCodeIgnoreService));
 	}

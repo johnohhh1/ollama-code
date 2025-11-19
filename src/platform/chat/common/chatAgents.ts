@@ -1,5 +1,5 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Copyright (c) John Olenski (Johnohhh1.dev). All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
@@ -26,11 +26,12 @@ export const editingSessionAgentEditorName = 'editingSessionEditor';
 export const notebookEditorAgentName = 'notebookEditorAgent';
 export const editsAgentName = 'editsAgent';
 
-export const CHAT_PARTICIPANT_ID_PREFIX = 'github.copilot.';
+// OLLAMA CODE: Changed participant ID prefix from 'github.copilot.' to 'ollama.code.'
+export const CHAT_PARTICIPANT_ID_PREFIX = 'ollama.code.';
 export function getChatParticipantIdFromName(name: string): string {
 	return `${CHAT_PARTICIPANT_ID_PREFIX}${name}`;
 }
 
 export function getChatParticipantNameFromId(id: string): string {
-	return id.replace(/^github\.copilot\./, '');
+	return id.replace(/^ollama\.code\./, '');
 }

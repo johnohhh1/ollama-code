@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npm run compile:*)",
+      "Bash(npx vsce:*)",
+      "Bash(code --install-extension:*)",
+      "Bash(curl:*)",
+      "Bash(code --command workbench.action.reloadWindow)",
+      "Bash(code --uninstall-extension:*)",
+      "Bash(code --list-extensions)",
+      "Bash(npm run package:*)",
+      "Bash(git remote set-url:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(npm run tsfmt:*)",
+      "Bash(npx tsfmt:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

@@ -131,7 +131,7 @@ class ChatAgents implements IDisposable {
 	}
 
 	private registerTerminalPanelAgent(): IDisposable {
-		const terminalPanelAgent = this.createAgent(terminalAgentName, Intent.Terminal, { id: 'github.copilot.terminalPanel' });
+		const terminalPanelAgent = this.createAgent(terminalAgentName, Intent.Terminal, { id: 'ollama.code.terminalPanel' });
 
 		terminalPanelAgent.iconPath = new vscode.ThemeIcon('terminal');
 
@@ -200,7 +200,8 @@ class ChatAgents implements IDisposable {
 			return Intent.Unknown;
 		};
 		const defaultAgent = this.createAgent(defaultAgentName, intentGetter);
-		defaultAgent.iconPath = new vscode.ThemeIcon('copilot');
+		// OLLAMA CODE: Changed icon from 'copilot' to 'hubot' for Ollama
+		defaultAgent.iconPath = new vscode.ThemeIcon('hubot');
 		this.initDefaultAgentRequestorProps(defaultAgent);
 
 		defaultAgent.helpTextPrefix = vscode.l10n.t('You can ask me general programming questions, or chat with the following participants which have specialized expertise and can perform actions:');
@@ -303,13 +304,15 @@ Learn more about [GitHub Copilot](https://docs.github.com/copilot/using-github-c
 		const endpoint = await this.endpointProvider.getChatEndpoint(request);
 		const baseEndpoint = await this.endpointProvider.getChatEndpoint('copilot-base');
 		// If it has a 0x multipler, it's free so don't switch them. If it's BYOK, it's free so don't switch them.
-		if (endpoint.multiplier === 0 || request.model.vendor !== 'copilot' || endpoint.multiplier === undefined) {
+		// OLLAMA CODE: Changed vendor check from 'copilot' to 'ollama'
+		if (endpoint.multiplier === 0 || request.model.vendor !== 'ollama' || endpoint.multiplier === undefined) {
 			return request;
 		}
 		if (this._chatQuotaService.overagesEnabled || !this._chatQuotaService.quotaExhausted) {
 			return request;
 		}
-		const baseLmModel = (await vscode.lm.selectChatModels({ id: baseEndpoint.model, family: baseEndpoint.family, vendor: 'copilot' }))[0];
+		// OLLAMA CODE: Changed vendor from 'copilot' to 'ollama'
+		const baseLmModel = (await vscode.lm.selectChatModels({ id: baseEndpoint.model, family: baseEndpoint.family, vendor: 'ollama' }))[0];
 		if (!baseLmModel) {
 			return request;
 		}
