@@ -1,6 +1,6 @@
 # Ollama Code - Your Local AI Coding Assistant
 
-**[Ollama Code](https://github.com/ollama-code/vscode-ollama-code)** is a free, open-source AI coding assistant that runs entirely on your machine using Ollama models.
+**[Ollama Code](https://github.com/johnohhh1/ollama-code)** is a free, open-source AI coding assistant that runs entirely on your machine using Ollama models.
 
 Ollama Code provides the same powerful AI features as GitHub Copilot Chat, but with complete privacy - your code never leaves your machine. Choose from any Ollama model, customize your experience, and enjoy unlimited usage with no subscription required.
 
