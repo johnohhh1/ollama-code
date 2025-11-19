@@ -33,3 +33,9 @@ coverage/
 test/simulation/cache/_base.sqlite
 
 test/aml/out
+
+# Extension package files
+*.vsix
+
+# Claude local settings
+.claude/settings.local.json
