@@ -2656,6 +2656,14 @@
 							"preview"
 						],
 						"markdownDescription": "%github.copilot.config.byok.ollamaEndpoint%"
+					},
+					"github.copilot.chat.byok.ollamaModel": {
+						"type": "string",
+						"default": "",
+						"tags": [
+							"preview"
+						],
+						"markdownDescription": "The Ollama model to use for chat and coding requests by default. This should match a model name returned by `ollama list`, for example `minimax-m2.7:cloud`."
 					}
 				}
 			},
@@ -5167,7 +5175,7 @@
 		"diff": "^8.0.3",
 		"dompurify": "^3.3.3",
 		"ignore": "^7.0.5",
-		"isbinaryfile": "^6.0.0",
+		"isbinaryfile": "^5.0.3",
 		"jsonc-parser": "^3.3.1",
 		"lru-cache": "^11.2.7",
 		"markdown-it": "^14.1.1",
@@ -5177,8 +5185,7 @@
 		"web-tree-sitter": "^0.23.0"
 	},
 	"overrides": {
-		"@aminya/node-gyp-build": "npm:node-gyp-build@4.8.1",
-		"string_decoder": "npm:string_decoder@1.2.0",
-		"node-gyp": "npm:node-gyp@10.3.1"
+		"string_decoder": "1.2.0",
+		"node-gyp": "10.3.1"
 	}
 }

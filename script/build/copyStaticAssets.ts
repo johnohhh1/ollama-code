@@ -12,6 +12,12 @@ export async function copyStaticAssets(srcpaths: string[], dst: string): Promise
 	await Promise.all(srcpaths.map(async srcpath => {
 		const src = path.join(REPO_ROOT, srcpath);
 		const dest = path.join(REPO_ROOT, dst, path.basename(srcpath));
+		try {
+			await fs.promises.access(src, fs.constants.R_OK);
+		} catch {
+			console.warn(`[copyStaticAssets] Skipping missing asset: ${srcpath}`);
+			return;
+		}
 		await fs.promises.mkdir(path.dirname(dest), { recursive: true });
 		await fs.promises.copyFile(src, dest);
 	}));

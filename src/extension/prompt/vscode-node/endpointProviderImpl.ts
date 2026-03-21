@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { LanguageModelChat, type ChatRequest } from 'vscode';
+import { lm, LanguageModelChat, type ChatRequest } from 'vscode';
 import { IAuthenticationService } from '../../../platform/authentication/common/authentication';
 import { ConfigKey, IConfigurationService } from '../../../platform/configuration/common/configurationService';
 import { ICAPIClientService } from '../../../platform/endpoint/common/capiClient';
@@ -73,6 +73,11 @@ export class ProductionEndpointProvider implements IEndpointProvider {
 		return this._configService.getConfig(ConfigKey.Advanced.DebugOverrideChatEngine);
 	}
 
+	private get _activeOllamaModel(): string | undefined {
+		const model = this._configService.getConfig(ConfigKey.OllamaModel);
+		return model || undefined;
+	}
+
 	private getOrCreateChatEndpointInstance(modelMetadata: IChatModelInformation): IChatEndpoint {
 		const modelId = modelMetadata.id;
 		let chatEndpoint = this._chatEndpoints.get(modelId);
@@ -104,6 +109,19 @@ export class ProductionEndpointProvider implements IEndpointProvider {
 				}
 			});
 		}
+
+		const activeOllamaModel = this._activeOllamaModel;
+		const requestedModel = typeof requestOrFamilyOrModel === 'string'
+			? undefined
+			: ('model' in requestOrFamilyOrModel ? requestOrFamilyOrModel.model : requestOrFamilyOrModel);
+		if (activeOllamaModel && (!requestedModel || requestedModel.vendor === 'ollama')) {
+			const selectedOllamaModel = (await lm.selectChatModels({ vendor: 'ollama', id: activeOllamaModel }))[0];
+			if (selectedOllamaModel) {
+				this._logService.trace(`Using configured Ollama model: ${activeOllamaModel}`);
+				return this._instantiationService.createInstance(ExtensionContributedChatEndpoint, selectedOllamaModel);
+			}
+		}
+
 		let endpoint: IChatEndpoint;
 		if (typeof requestOrFamilyOrModel === 'string') {
 			// The family case, resolve the chat model for the passed in family

@@ -40,6 +40,7 @@ const baseNodeBuildOptions = {
 		'sqlite3',
 		'node-pty', // Required by @github/copilot
 		'@github/copilot',
+		'@anthropic-ai/claude-code',
 		...(isDev ? [] : ['dotenv', 'source-map-support'])
 	],
 	platform: 'node',

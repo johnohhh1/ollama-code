@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { commands, window, QuickPickItem, ProgressLocation, CancellationToken } from 'vscode';
+import { commands, window, QuickPickItem, ProgressLocation, CancellationToken, lm } from 'vscode';
 import { Disposable } from '../../../util/vs/base/common/lifecycle';
 import { ILogService } from '../../../platform/log/common/logService';
-import { IConfigurationService } from '../../../platform/configuration/common/configurationService';
+import { ConfigKey, IConfigurationService } from '../../../platform/configuration/common/configurationService';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 
@@ -36,6 +36,7 @@ export class OllamaCommands extends Disposable {
 	) {
 		super();
 		this.ollamaEndpoint = this.configService.getConfig({ key: 'github.copilot.chat.byok.ollamaEndpoint' } as any) || 'http://localhost:11434';
+		this.currentModel = this.configService.getConfig(ConfigKey.OllamaModel) || '';
 
 		this.registerCommands();
 	}
@@ -674,9 +675,18 @@ ${results.response}
 	 * Set active model
 	 */
 	private async setActiveModel(modelName: string): Promise<void> {
-		// Store in configuration or memory
 		this.currentModel = modelName;
-		// Trigger model change event if needed
+		await this.configService.setConfig(ConfigKey.OllamaModel, modelName);
+
+		const selectedModel = (await lm.selectChatModels({ vendor: 'ollama', id: modelName }))[0];
+		if (selectedModel) {
+			await commands.executeCommand('workbench.action.chat.changeModel', {
+				vendor: selectedModel.vendor,
+				id: selectedModel.id,
+				family: selectedModel.family
+			});
+		}
+
 		commands.executeCommand('ollama.code.modelChanged', modelName);
 	}
 

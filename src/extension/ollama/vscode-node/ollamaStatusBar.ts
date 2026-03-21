@@ -6,6 +6,7 @@
 import { StatusBarAlignment, StatusBarItem, ThemeColor, window } from 'vscode';
 import { Disposable } from '../../../util/vs/base/common/lifecycle';
 import { ILogService } from '../../../platform/log/common/logService';
+import { ConfigKey, IConfigurationService } from '../../../platform/configuration/common/configurationService';
 
 export interface IOllamaModel {
 	name: string;
@@ -27,10 +28,12 @@ export class OllamaStatusBar extends Disposable {
 
 	constructor(
 		@ILogService private readonly logService: ILogService,
+		@IConfigurationService configurationService: IConfigurationService,
 		endpoint: string = 'http://localhost:11434'
 	) {
 		super();
 		this.ollamaEndpoint = endpoint;
+		this.currentModel = configurationService.getConfig(ConfigKey.OllamaModel) || '';
 
 		// Create status bar item
 		this.statusBarItem = window.createStatusBarItem(StatusBarAlignment.Right, 100);
